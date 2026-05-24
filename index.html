@@ -1,432 +1,369 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>เข้าสู่ระบบ | ระบบขออนุมัติ โรงเรียนสุรวิทยาคาร</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกขอจัดซื้อ/จัดจ้าง/เบิกจ่าย - โรงเรียนสุรวิทยาคาร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-      :root {
-        --deep-green: #062f24;
-        --deep-green-2: #0b4a35;
-        --glass: rgba(255, 255, 255, 0.15);
-        --glass-strong: rgba(255, 255, 255, 0.22);
-        --gold: #d8ad3d;
-        --gold-light: #f2d37b;
-        --text: #f7fff9;
-        --muted: rgba(247, 255, 249, 0.74);
-        --danger: #ffcfcc;
-        --shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
-        font-family: "TH Sarabun New", "TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif;
-        font-size: 21px;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        min-height: 100%;
-      }
-
-      body {
-        margin: 0;
-        color: var(--text);
-        font-family: "TH Sarabun New", "TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif;
-        background:
-          radial-gradient(circle at 15% 18%, rgba(216, 173, 61, 0.24), transparent 28rem),
-          radial-gradient(circle at 82% 78%, rgba(22, 135, 90, 0.5), transparent 34rem),
-          linear-gradient(135deg, #041c16 0%, var(--deep-green) 48%, #0c3f31 100%);
-        overflow-x: hidden;
-      }
-
-      button {
-        font: inherit;
-      }
-
-      .page {
-        position: relative;
-        display: grid;
-        min-height: 100vh;
-        place-items: center;
-        padding: 1.25rem;
-      }
-
-      .page::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-        background-size: 42px 42px;
-        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 82%);
-      }
-
-      .glass-card {
-        width: min(30rem, 100%);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        border-radius: 2rem;
-        padding: 2rem;
-        background: var(--glass);
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(28px) saturate(160%);
-        -webkit-backdrop-filter: blur(28px) saturate(160%);
-      }
-
-      .login-card {
-        display: grid;
-        justify-items: center;
-        text-align: center;
-      }
-
-      .school-mark {
-        display: grid;
-        width: 4.5rem;
-        height: 4.5rem;
-        margin-bottom: 1rem;
-        place-items: center;
-        border: 1px solid rgba(242, 211, 123, 0.7);
-        border-radius: 1.35rem;
-        color: #163323;
-        background: linear-gradient(135deg, var(--gold-light), var(--gold));
-        box-shadow: 0 16px 38px rgba(216, 173, 61, 0.28);
-        font-size: 1.75rem;
-        font-weight: 800;
-      }
-
-      h1,
-      h2,
-      p {
-        margin: 0;
-      }
-
-      h1 {
-        font-size: clamp(1.8rem, 5vw, 2.35rem);
-        line-height: 1.05;
-      }
-
-      .subtitle {
-        margin-top: 0.55rem;
-        color: var(--muted);
-        font-size: 1.12rem;
-        line-height: 1.35;
-      }
-
-      .google-wrap {
-        display: grid;
-        min-height: 3rem;
-        margin-top: 1.55rem;
-        place-items: center;
-      }
-
-      .status-text {
-        min-height: 1.45rem;
-        margin-top: 1rem;
-        color: var(--gold-light);
-        font-size: 1rem;
-      }
-
-      .app-card {
-        display: none;
-      }
-
-      .app-card.active {
-        display: block;
-      }
-
-      .profile-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .avatar {
-        flex: 0 0 auto;
-        width: 4rem;
-        height: 4rem;
-        border: 2px solid rgba(242, 211, 123, 0.8);
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.18);
-        object-fit: cover;
-      }
-
-      .eyebrow {
-        color: var(--gold-light);
-        font-size: 1rem;
-        font-weight: 700;
-      }
-
-      .greeting {
-        margin-top: 0.25rem;
-        font-size: clamp(1.45rem, 4vw, 2rem);
-        line-height: 1.1;
-      }
-
-      .profile-details {
-        display: grid;
-        gap: 0.65rem;
-        margin-top: 1.35rem;
-      }
-
-      .detail-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        border-radius: 1rem;
-        padding: 0.7rem 0.85rem;
-        background: var(--glass-strong);
-      }
-
-      .detail-row span {
-        color: var(--muted);
-      }
-
-      .detail-row strong {
-        text-align: right;
-      }
-
-      .gold-button {
-        width: 100%;
-        min-height: 2.85rem;
-        margin-top: 1.35rem;
-        border: 0;
-        border-radius: 999px;
-        color: #143222;
-        background: linear-gradient(135deg, var(--gold-light), var(--gold));
-        box-shadow: 0 18px 36px rgba(216, 173, 61, 0.24);
-        cursor: pointer;
-        font-size: 1.08rem;
-        font-weight: 800;
-      }
-
-      .hidden {
-        display: none !important;
-      }
-
-      @media (max-width: 560px) {
         :root {
-          font-size: 20px;
+            --primary-green: #004d28;
+            --dark-green: #001a0f;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --text-light: #f4f4f4;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(212, 175, 55, 0.3);
         }
 
-        .glass-card {
-          padding: 1.35rem;
-          border-radius: 1.55rem;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
         }
 
-        .profile-header {
-          align-items: flex-start;
+        body {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .detail-row {
-          align-items: flex-start;
-          flex-direction: column;
-          gap: 0.15rem;
+        .bg-circle-1 {
+            position: absolute; width: 400px; height: 400px;
+            background: rgba(212, 175, 55, 0.15); border-radius: 50%;
+            top: -100px; left: -100px; filter: blur(80px); z-index: 0;
         }
 
-        .detail-row strong {
-          text-align: left;
+        .bg-circle-2 {
+            position: absolute; width: 300px; height: 300px;
+            background: rgba(0, 255, 100, 0.1); border-radius: 50%;
+            bottom: -50px; right: -50px; filter: blur(60px); z-index: 0;
         }
-      }
+
+        .glass-container {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 2.5rem; width: 100%; max-width: 700px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative; z-index: 1;
+        }
+
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { color: var(--gold); font-size: 1.6rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .header p { font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--gold-light); }
+
+        input, select {
+            width: 100%; padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px; color: white; font-size: 0.95rem; transition: all 0.3s ease;
+        }
+        input::placeholder { color: rgba(255, 255, 255, 0.3); }
+        input:focus, select:focus {
+            outline: none; border-color: var(--gold);
+            background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+        input[readonly] {
+            background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.7);
+            border-style: dashed; cursor: not-allowed;
+        }
+
+        select option { background-color: var(--dark-green); color: white; }
+
+        /* Autocomplete styles */
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; width: 100%;
+            background: rgba(0, 43, 22, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid var(--gold); border-radius: 8px;
+            max-height: 200px; overflow-y: auto; z-index: 10;
+            display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            margin-top: 5px;
+        }
+        .autocomplete-item {
+            padding: 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover { background: rgba(212, 175, 55, 0.2); }
+        .autocomplete-item strong { color: var(--gold); }
+        .autocomplete-item small { display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-top: 0.2rem;}
+
+        button.submit-btn {
+            width: 100%; padding: 1rem; margin-top: 1.5rem;
+            background: linear-gradient(135deg, #d4af37 0%, #b58d18 100%);
+            color: var(--dark-green); border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4); }
+
+        .loading-overlay, .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center;
+            flex-direction: column; z-index: 1000;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .modal-content {
+            background: rgba(0, 43, 22, 0.9); border: 1px solid var(--gold);
+            border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px;
+        }
+        .modal-content h2 { color: var(--gold); margin-bottom: 1rem; }
+        .modal-content p { margin-bottom: 2rem; color: var(--text-light); }
+        .download-btn {
+            display: inline-block; padding: 0.8rem 1.5rem;
+            color: var(--gold); border: 2px solid var(--gold);
+            border-radius: 10px; text-decoration: none; font-weight: 500;
+        }
+        .download-btn:hover { background: var(--gold); color: var(--dark-green); }
+        .close-btn { margin-top: 1.5rem; display: block; color: rgba(255,255,255,0.6); text-decoration: underline; cursor: pointer; }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .glass-container { padding: 1.5rem; }
+        }
     </style>
-  </head>
-  <body>
-    <main class="page">
-      <section id="loginState" class="glass-card login-card" aria-labelledby="loginTitle">
-        <div class="school-mark" aria-hidden="true">สว</div>
-        <h1 id="loginTitle">ระบบขออนุมัติ โรงเรียนสุรวิทยาคาร</h1>
-        <p class="subtitle">จัดซื้อ จัดจ้าง และไปราชการ</p>
-        <div class="google-wrap">
-          <div id="googleSignInButton"></div>
-        </div>
-        <p id="loginStatus" class="status-text" aria-live="polite"></p>
-      </section>
+</head>
+<body>
 
-      <section id="appState" class="glass-card app-card" aria-labelledby="greetingText">
-        <div class="profile-header">
-          <img id="profileImage" class="avatar" alt="" />
-          <div>
-            <p class="eyebrow">เข้าสู่ระบบสำเร็จ</p>
-            <h2 id="greetingText" class="greeting">สวัสดี</h2>
-          </div>
+    <div class="bg-circle-1"></div><div class="bg-circle-2"></div>
+
+    <div class="glass-container">
+        <div class="header">
+            <h1>ระบบจัดทำบันทึกข้อความ</h1>
+            <p>โรงเรียนสุรวิทยาคาร</p>
         </div>
 
-        <div class="profile-details">
-          <div class="detail-row">
-            <span>อีเมล</span>
-            <strong id="profileEmail">-</strong>
-          </div>
-          <div class="detail-row">
-            <span>ฝ่าย/กลุ่มงาน</span>
-            <strong id="profileDepartment">-</strong>
-          </div>
-          <div class="detail-row">
-            <span>สิทธิ์การใช้งาน</span>
-            <strong id="profileRole">-</strong>
-          </div>
-        </div>
+        <form id="requestForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>วันที่บันทึก</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>ผู้รับผิดชอบโครงการ</label>
+                    <input type="text" name="name" placeholder="นาย/นาง/นางสาว..." required>
+                </div>
 
-        <button id="signOutButton" class="gold-button" type="button">ออกจากระบบ</button>
-      </section>
-    </main>
+                <div class="form-group full-width">
+                    <label>กลุ่มบริหารงาน / กลุ่มสาระ</label>
+                    <input type="text" name="department" placeholder="เช่น กลุ่มสาระการเรียนรู้วิทยาศาสตร์" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>มีความประสงค์ขออนุมัติใช้งบประมาณเพื่อ</label>
+                    <select name="requestType" required>
+                        <option value="" disabled selected>เลือกประเภท...</option>
+                        <option value="จัดซื้อ">จัดซื้อ</option>
+                        <option value="จัดจ้าง">จัดจ้าง</option>
+                        <option value="เบิกจ่ายเงิน">เบิกจ่ายเงิน</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>ชื่อเรื่อง</label>
+                    <input type="text" name="subject" placeholder="เช่น ขออนุมัติซื้อวัสดุ..." required>
+                </div>
+
+                <!-- ระบบค้นหาโครงการ/กิจกรรม -->
+                <div class="form-group full-width autocomplete-wrapper">
+                    <label style="color: #00ff88; font-weight: 500;">🔍 ค้นหากิจกรรม (พิมพ์รหัส หรือ ชื่อกิจกรรม)</label>
+                    <input type="text" id="searchActivity" placeholder="พิมพ์เพื่อค้นหากิจกรรมจากฐานข้อมูล...">
+                    <div id="autocompleteList" class="autocomplete-list"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>ตามโครงการที่</label>
+                    <input type="text" id="projectId" name="projectId" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>ชื่อโครงการ</label>
+                    <input type="text" id="projectName" name="projectName" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>กิจกรรมที่</label>
+                    <input type="text" id="activityId" name="activityId" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>ชื่อกิจกรรม</label>
+                    <input type="text" id="activityName" name="activityName" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>กิจกรรมย่อย (ถ้ามี)</label>
+                    <input type="text" name="subActivity" placeholder="ใส่ชื่อกิจกรรมย่อย หรือ ปล่อยว่าง">
+                </div>
+
+                <div class="form-group">
+                    <label>งบประมาณที่ได้รับจัดสรร (บาท)</label>
+                    <input type="number" id="allocatedBudget" name="allocatedBudget" placeholder="0.00" step="0.01" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>ขอใช้งบประมาณครั้งนี้ (บาท)</label>
+                    <input type="number" name="requestedAmount" placeholder="0.00" step="0.01" required>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">สร้างเอกสารบันทึกข้อความ PDF</button>
+        </form>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="color: var(--gold); margin-top: 15px;" id="loadingText">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <h2>สำเร็จ! 🎉</h2>
+            <p>ระบบสร้างไฟล์ PDF บันทึกข้อความเรียบร้อยแล้ว</p>
+            <a href="#" id="pdfDownloadBtn" class="download-btn" target="_blank">📥 ดาวน์โหลดเอกสาร</a>
+            <span class="close-btn" onclick="document.getElementById('successModal').style.display='none'">ปิด</span>
+        </div>
+    </div>
 
     <script>
-      // TODO: เปลี่ยนเป็น Client ID จาก Google Cloud Console
-      const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+        // ใส่ URL ที่ได้จาก Google Apps Script (Web App) ตรงนี้
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEF5_gWJPMu6Gi1wykkMmGbAgepxR5eLS1hSsFQXxiyD_5hNfio_ohypeMrzP6KoJVZw/exec';
+        
+        let projectsData = []; // เก็บฐานข้อมูลโครงการและกิจกรรม
+        
+        const searchInput = document.getElementById('searchActivity');
+        const autocompleteList = document.getElementById('autocompleteList');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
 
-      // TODO: เปลี่ยนเป็น URL หลัง Deploy Google Apps Script Web App
-      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnf2Rb9xJFuDl-IOVoTmC29f-9LR_OO2Jvg1l87opNxozt3Z197jFQEzsI3wOa3Wa2WA/exec";
+        // ตั้งวันที่ปัจจุบัน
+        document.getElementById('date').valueAsDate = new Date();
 
-      const loginState = document.getElementById("loginState");
-      const appState = document.getElementById("appState");
-      const loginStatus = document.getElementById("loginStatus");
-
-      window.addEventListener("load", initGoogleLogin);
-      document.getElementById("signOutButton").addEventListener("click", signOut);
-
-      /**
-       * เตรียมปุ่ม Sign in with Google ด้วย Google Identity Services
-       */
-      function initGoogleLogin() {
-        if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith("YOUR_")) {
-          setLoginStatus("กรุณาตั้งค่า GOOGLE_CLIENT_ID ก่อนใช้งาน");
-          return;
+        // 1. ดึงข้อมูลโครงการจาก Sheet เมื่อหน้าเว็บโหลด
+        async function fetchProjectsData() {
+            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') return;
+            
+            loadingText.innerText = "กำลังโหลดฐานข้อมูลโครงการ...";
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    projectsData = result.data;
+                } else {
+                    console.error('Failed to load projects:', result.message);
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            } finally {
+                loadingOverlay.style.display = 'none';
+                loadingText.innerText = "กำลังสร้างเอกสาร PDF...";
+            }
         }
 
-        if (!window.google || !window.google.accounts || !window.google.accounts.id) {
-          setLoginStatus("กำลังโหลด Google Login...");
-          window.setTimeout(initGoogleLogin, 250);
-          return;
-        }
+        // 2. ระบบ Autocomplete ค้นหากิจกรรม
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            autocompleteList.innerHTML = '';
+            
+            if (!val) {
+                autocompleteList.style.display = 'none';
+                return;
+            }
 
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse,
+            const matched = projectsData.filter(p => 
+                p.activityName.toLowerCase().includes(val) || 
+                p.activityId.toString().toLowerCase().includes(val) ||
+                p.projectName.toLowerCase().includes(val)
+            ).slice(0, 10); // แสดงสูงสุด 10 รายการ
+
+            if (matched.length > 0) {
+                autocompleteList.style.display = 'block';
+                matched.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${p.activityId} : ${p.activityName}</strong>
+                                     <small>โครงการ: ${p.projectId} - ${p.projectName}</small>`;
+                    
+                    div.addEventListener('click', function() {
+                        // เมื่อคลิกเลือก ให้นำค่าไปใส่ในช่อง readonly
+                        document.getElementById('projectId').value = p.projectId;
+                        document.getElementById('projectName').value = p.projectName;
+                        document.getElementById('activityId').value = p.activityId;
+                        document.getElementById('activityName').value = p.activityName;
+                        document.getElementById('allocatedBudget').value = p.allocatedBudget;
+                        
+                        searchInput.value = `${p.activityId} - ${p.activityName}`;
+                        autocompleteList.style.display = 'none';
+                    });
+                    autocompleteList.appendChild(div);
+                });
+            } else {
+                autocompleteList.style.display = 'none';
+            }
         });
 
-        google.accounts.id.renderButton(document.getElementById("googleSignInButton"), {
-          type: "standard",
-          theme: "filled_blue",
-          size: "large",
-          shape: "pill",
-          text: "signin_with",
-          locale: "th",
+        // ซ่อน dropdown เมื่อคลิกที่อื่น
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput) {
+                autocompleteList.style.display = 'none';
+            }
         });
 
-        setLoginStatus("");
-      }
+        // 3. ส่งข้อมูลแบบฟอร์มเพื่อสร้าง PDF
+        document.getElementById('requestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+                alert('โปรดใส่ Web App URL ในโค้ดก่อนใช้งาน'); return;
+            }
 
-      /**
-       * ทำงานหลัง Login สำเร็จ:
-       * 1. Decode ID token เพื่อดึง email
-       * 2. เรียก Apps Script doGet ด้วย action=getUserProfile
-       * 3. ตรวจ role และแสดงหน้าหลักเมื่อมีสิทธิ์
-       */
-      async function handleCredentialResponse(response) {
-        try {
-          setLoginStatus("กำลังตรวจสอบสิทธิ์...");
+            loadingOverlay.style.display = 'flex';
+            
+            const formData = new FormData(e.target);
+            const data = new URLSearchParams(formData);
 
-          const googleProfile = decodeJwt(response.credential);
-          const email = googleProfile.email;
-          const userProfile = await fetchUserProfile(email);
-
-          if (!userProfile || userProfile.role === "GUEST") {
-            alert("ไม่มีสิทธิ์เข้าใช้งานระบบ กรุณาติดต่อผู้ดูแลระบบ");
-            signOut();
-            return;
-          }
-
-          showAppState(userProfile, googleProfile);
-        } catch (error) {
-          console.error(error);
-          alert("ไม่สามารถเข้าสู่ระบบได้: " + (error.message || error));
-          signOut();
-        }
-      }
-
-      /**
-       * เรียก Apps Script API เพื่อดึงข้อมูลผู้ใช้จากชีต UserRoles
-       *
-       * Apps Script doGet จะรับ:
-       * action=getUserProfile
-       * email=อีเมลผู้ใช้
-       */
-      async function fetchUserProfile(email) {
-        if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith("YOUR_")) {
-          throw new Error("กรุณาตั้งค่า APPS_SCRIPT_URL ก่อนใช้งาน");
-        }
-
-        const url = new URL(APPS_SCRIPT_URL);
-        url.searchParams.set("action", "getUserProfile");
-        url.searchParams.set("email", email);
-
-        const response = await fetch(url.toString(), {
-          method: "GET",
-          mode: "cors",
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: data });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    document.getElementById('pdfDownloadBtn').href = result.pdfUrl;
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('successModal').style.display = 'flex';
+                    e.target.reset();
+                    searchInput.value = '';
+                    document.getElementById('date').valueAsDate = new Date();
+                } else throw new Error(result.message);
+            } catch (error) {
+                alert('ข้อผิดพลาด: ' + error.message);
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
         });
 
-        if (!response.ok) {
-          throw new Error("Apps Script API ตอบกลับไม่สำเร็จ");
-        }
-
-        const result = await response.json();
-
-        if (!result.ok) {
-          throw new Error(result.error || "ไม่สามารถดึงข้อมูลผู้ใช้ได้");
-        }
-
-        return result.data;
-      }
-
-      /**
-       * แสดง State 2 หลังผ่านสิทธิ์เรียบร้อย
-       */
-      function showAppState(userProfile, googleProfile) {
-        const name = userProfile.name || googleProfile.name || userProfile.email;
-        const position = userProfile.position || "-";
-
-        document.getElementById("profileImage").src = googleProfile.picture || "";
-        document.getElementById("greetingText").textContent = `สวัสดี ${name} (${position})`;
-        document.getElementById("profileEmail").textContent = userProfile.email || "-";
-        document.getElementById("profileDepartment").textContent = userProfile.department || "-";
-        document.getElementById("profileRole").textContent = userProfile.role || "-";
-
-        loginState.classList.add("hidden");
-        appState.classList.add("active");
-      }
-
-      /**
-       * ออกจากระบบและกลับไปหน้า Login
-       */
-      function signOut() {
-        google.accounts.id.disableAutoSelect();
-        appState.classList.remove("active");
-        loginState.classList.remove("hidden");
-        setLoginStatus("");
-      }
-
-      /**
-       * Decode Google ID token เพื่ออ่านข้อมูลพื้นฐาน เช่น email, name, picture
-       */
-      function decodeJwt(token) {
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const jsonPayload = decodeURIComponent(
-          atob(base64)
-            .split("")
-            .map((char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2))
-            .join(""),
-        );
-
-        return JSON.parse(jsonPayload);
-      }
-
-      function setLoginStatus(message) {
-        loginStatus.textContent = message;
-      }
+        // เริ่มต้นโหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.addEventListener('load', fetchProjectsData);
     </script>
-  </body>
+</body>
 </html>
