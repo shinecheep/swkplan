@@ -248,7 +248,7 @@
 
     <script>
         // ใส่ URL ที่ได้จาก Google Apps Script (Web App) ตรงนี้
-        const SCRIPT_URL = 'https://script.google.com/https://script.google.com/macros/s/AKfycby-OeSlPLmxPeOHPEgYronLGxnZv4g4OOJUO17kCQG1N7wN5dGVFB2hoBPyLjfrzEKM_w/exec/s//exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjrxfFFNoJqEP04Ddq1slCicTOfTzc6iBZQSMT4id2M7Y8LpXDwjHn2IvkoHDoMsUjnw/exec';
         
         let projectsData = []; // เก็บฐานข้อมูลโครงการและกิจกรรม
         
@@ -262,7 +262,7 @@
 
         // 1. ดึงข้อมูลโครงการจาก Sheet เมื่อหน้าเว็บโหลด
         async function fetchProjectsData() {
-            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycby-OeSlPLmxPeOHPEgYronLGxnZv4g4OOJUO17kCQG1N7wN5dGVFB2hoBPyLjfrzEKM_w/exec') return;
+            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwjrxfFFNoJqEP04Ddq1slCicTOfTzc6iBZQSMT4id2M7Y8LpXDwjHn2IvkoHDoMsUjnw/exec') return;
             
             loadingText.innerText = "กำลังโหลดฐานข้อมูลโครงการ...";
             loadingOverlay.style.display = 'flex';
