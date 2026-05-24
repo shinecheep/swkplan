@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกขอจัดซื้อ/จัดจ้าง/เบิกจ่าย - โรงเรียนสุรวิทยาคาร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #004d28;
+            --dark-green: #001a0f;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --text-light: #f4f4f4;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .bg-circle-1 {
+            position: absolute; width: 400px; height: 400px;
+            background: rgba(212, 175, 55, 0.15); border-radius: 50%;
+            top: -100px; left: -100px; filter: blur(80px); z-index: 0;
+        }
+
+        .bg-circle-2 {
+            position: absolute; width: 300px; height: 300px;
+            background: rgba(0, 255, 100, 0.1); border-radius: 50%;
+            bottom: -50px; right: -50px; filter: blur(60px); z-index: 0;
+        }
+
+        .glass-container {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 2.5rem; width: 100%; max-width: 700px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative; z-index: 1;
+        }
+
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { color: var(--gold); font-size: 1.6rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .header p { font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--gold-light); }
+
+        input, select {
+            width: 100%; padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px; color: white; font-size: 0.95rem; transition: all 0.3s ease;
+        }
+        input::placeholder { color: rgba(255, 255, 255, 0.3); }
+        input:focus, select:focus {
+            outline: none; border-color: var(--gold);
+            background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+        input[readonly] {
+            background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.7);
+            border-style: dashed; cursor: not-allowed;
+        }
+
+        select option { background-color: var(--dark-green); color: white; }
+
+        /* Autocomplete styles */
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; width: 100%;
+            background: rgba(0, 43, 22, 0.95); backdrop-filter: blur(10px);
+            border: 1px solid var(--gold); border-radius: 8px;
+            max-height: 200px; overflow-y: auto; z-index: 10;
+            display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            margin-top: 5px;
+        }
+        .autocomplete-item {
+            padding: 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover { background: rgba(212, 175, 55, 0.2); }
+        .autocomplete-item strong { color: var(--gold); }
+        .autocomplete-item small { display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-top: 0.2rem;}
+
+        button.submit-btn {
+            width: 100%; padding: 1rem; margin-top: 1.5rem;
+            background: linear-gradient(135deg, #d4af37 0%, #b58d18 100%);
+            color: var(--dark-green); border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4); }
+
+        .loading-overlay, .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center;
+            flex-direction: column; z-index: 1000;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .modal-content {
+            background: rgba(0, 43, 22, 0.9); border: 1px solid var(--gold);
+            border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px;
+        }
+        .modal-content h2 { color: var(--gold); margin-bottom: 1rem; }
+        .modal-content p { margin-bottom: 2rem; color: var(--text-light); }
+        .download-btn {
+            display: inline-block; padding: 0.8rem 1.5rem;
+            color: var(--gold); border: 2px solid var(--gold);
+            border-radius: 10px; text-decoration: none; font-weight: 500;
+        }
+        .download-btn:hover { background: var(--gold); color: var(--dark-green); }
+        .close-btn { margin-top: 1.5rem; display: block; color: rgba(255,255,255,0.6); text-decoration: underline; cursor: pointer; }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .glass-container { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-circle-1"></div><div class="bg-circle-2"></div>
+
+    <div class="glass-container">
+        <div class="header">
+            <h1>ระบบจัดทำบันทึกข้อความ</h1>
+            <p>โรงเรียนสุรวิทยาคาร</p>
+        </div>
+
+        <form id="requestForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>วันที่บันทึก</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>ผู้รับผิดชอบโครงการ</label>
+                    <input type="text" name="name" placeholder="นาย/นาง/นางสาว..." required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>กลุ่มบริหารงาน / กลุ่มสาระ</label>
+                    <input type="text" name="department" placeholder="เช่น กลุ่มสาระการเรียนรู้วิทยาศาสตร์" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>มีความประสงค์ขออนุมัติใช้งบประมาณเพื่อ</label>
+                    <select name="requestType" required>
+                        <option value="" disabled selected>เลือกประเภท...</option>
+                        <option value="จัดซื้อ">จัดซื้อ</option>
+                        <option value="จัดจ้าง">จัดจ้าง</option>
+                        <option value="เบิกจ่ายเงิน">เบิกจ่ายเงิน</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>ชื่อเรื่อง</label>
+                    <input type="text" name="subject" placeholder="เช่น ขออนุมัติซื้อวัสดุ..." required>
+                </div>
+
+                <!-- ระบบค้นหาโครงการ/กิจกรรม -->
+                <div class="form-group full-width autocomplete-wrapper">
+                    <label style="color: #00ff88; font-weight: 500;">🔍 ค้นหากิจกรรม (พิมพ์รหัส หรือ ชื่อกิจกรรม)</label>
+                    <input type="text" id="searchActivity" placeholder="พิมพ์เพื่อค้นหากิจกรรมจากฐานข้อมูล...">
+                    <div id="autocompleteList" class="autocomplete-list"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>ตามโครงการที่</label>
+                    <input type="text" id="projectId" name="projectId" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>ชื่อโครงการ</label>
+                    <input type="text" id="projectName" name="projectName" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>กิจกรรมที่</label>
+                    <input type="text" id="activityId" name="activityId" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>ชื่อกิจกรรม</label>
+                    <input type="text" id="activityName" name="activityName" placeholder="-" readonly required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>กิจกรรมย่อย (ถ้ามี)</label>
+                    <input type="text" name="subActivity" placeholder="ใส่ชื่อกิจกรรมย่อย หรือ ปล่อยว่าง">
+                </div>
+
+                <div class="form-group">
+                    <label>งบประมาณที่ได้รับจัดสรร (บาท)</label>
+                    <input type="number" id="allocatedBudget" name="allocatedBudget" placeholder="0.00" step="0.01" readonly required>
+                </div>
+
+                <div class="form-group">
+                    <label>ขอใช้งบประมาณครั้งนี้ (บาท)</label>
+                    <input type="number" name="requestedAmount" placeholder="0.00" step="0.01" required>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">สร้างเอกสารบันทึกข้อความ PDF</button>
+        </form>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="color: var(--gold); margin-top: 15px;" id="loadingText">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <h2>สำเร็จ! 🎉</h2>
+            <p>ระบบสร้างไฟล์ PDF บันทึกข้อความเรียบร้อยแล้ว</p>
+            <a href="#" id="pdfDownloadBtn" class="download-btn" target="_blank">📥 ดาวน์โหลดเอกสาร</a>
+            <span class="close-btn" onclick="document.getElementById('successModal').style.display='none'">ปิด</span>
+        </div>
+    </div>
+
+    <script>
+        // ใส่ URL ที่ได้จาก Google Apps Script (Web App) ตรงนี้
+        const SCRIPT_URL = 'https://script.google.com/https://script.google.com/macros/s/AKfycby-OeSlPLmxPeOHPEgYronLGxnZv4g4OOJUO17kCQG1N7wN5dGVFB2hoBPyLjfrzEKM_w/exec/s//exec';
+        
+        let projectsData = []; // เก็บฐานข้อมูลโครงการและกิจกรรม
+        
+        const searchInput = document.getElementById('searchActivity');
+        const autocompleteList = document.getElementById('autocompleteList');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        // ตั้งวันที่ปัจจุบัน
+        document.getElementById('date').valueAsDate = new Date();
+
+        // 1. ดึงข้อมูลโครงการจาก Sheet เมื่อหน้าเว็บโหลด
+        async function fetchProjectsData() {
+            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycby-OeSlPLmxPeOHPEgYronLGxnZv4g4OOJUO17kCQG1N7wN5dGVFB2hoBPyLjfrzEKM_w/exec') return;
+            
+            loadingText.innerText = "กำลังโหลดฐานข้อมูลโครงการ...";
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    projectsData = result.data;
+                } else {
+                    console.error('Failed to load projects:', result.message);
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            } finally {
+                loadingOverlay.style.display = 'none';
+                loadingText.innerText = "กำลังสร้างเอกสาร PDF...";
+            }
+        }
+
+        // 2. ระบบ Autocomplete ค้นหากิจกรรม
+        searchInput.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            autocompleteList.innerHTML = '';
+            
+            if (!val) {
+                autocompleteList.style.display = 'none';
+                return;
+            }
+
+            const matched = projectsData.filter(p => 
+                p.activityName.toLowerCase().includes(val) || 
+                p.activityId.toString().toLowerCase().includes(val) ||
+                p.projectName.toLowerCase().includes(val)
+            ).slice(0, 10); // แสดงสูงสุด 10 รายการ
+
+            if (matched.length > 0) {
+                autocompleteList.style.display = 'block';
+                matched.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${p.activityId} : ${p.activityName}</strong>
+                                     <small>โครงการ: ${p.projectId} - ${p.projectName}</small>`;
+                    
+                    div.addEventListener('click', function() {
+                        // เมื่อคลิกเลือก ให้นำค่าไปใส่ในช่อง readonly
+                        document.getElementById('projectId').value = p.projectId;
+                        document.getElementById('projectName').value = p.projectName;
+                        document.getElementById('activityId').value = p.activityId;
+                        document.getElementById('activityName').value = p.activityName;
+                        document.getElementById('allocatedBudget').value = p.allocatedBudget;
+                        
+                        searchInput.value = `${p.activityId} - ${p.activityName}`;
+                        autocompleteList.style.display = 'none';
+                    });
+                    autocompleteList.appendChild(div);
+                });
+            } else {
+                autocompleteList.style.display = 'none';
+            }
+        });
+
+        // ซ่อน dropdown เมื่อคลิกที่อื่น
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput) {
+                autocompleteList.style.display = 'none';
+            }
+        });
+
+        // 3. ส่งข้อมูลแบบฟอร์มเพื่อสร้าง PDF
+        document.getElementById('requestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+                alert('โปรดใส่ Web App URL ในโค้ดก่อนใช้งาน'); return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            
+            const formData = new FormData(e.target);
+            const data = new URLSearchParams(formData);
+
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: data });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    document.getElementById('pdfDownloadBtn').href = result.pdfUrl;
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('successModal').style.display = 'flex';
+                    e.target.reset();
+                    searchInput.value = '';
+                    document.getElementById('date').valueAsDate = new Date();
+                } else throw new Error(result.message);
+            } catch (error) {
+                alert('ข้อผิดพลาด: ' + error.message);
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        });
+
+        // เริ่มต้นโหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.addEventListener('load', fetchProjectsData);
+    </script>
+</body>
+</html>
