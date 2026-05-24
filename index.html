@@ -262,7 +262,6 @@
 
         // 1. ดึงข้อมูลโครงการจาก Sheet เมื่อหน้าเว็บโหลด
         async function fetchProjectsData() {
-            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwjrxfFFNoJqEP04Ddq1slCicTOfTzc6iBZQSMT4id2M7Y8LpXDwjHn2IvkoHDoMsUjnw/exec') return;
             
             loadingText.innerText = "กำลังโหลดฐานข้อมูลโครงการ...";
             loadingOverlay.style.display = 'flex';
@@ -335,7 +334,7 @@
         // 3. ส่งข้อมูลแบบฟอร์มเพื่อสร้าง PDF
         document.getElementById('requestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
                 alert('โปรดใส่ Web App URL ในโค้ดก่อนใช้งาน'); return;
             }
 
